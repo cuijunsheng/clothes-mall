@@ -1,5 +1,5 @@
 {
-  "name": "clothes-mall",
+  "name": "girl-mall",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -18,10 +18,5 @@
     "@vue/cli-plugin-vuex": "~4.3.0",
     "@vue/cli-service": "~4.3.0",
     "vue-template-compiler": "^2.6.11"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+  }
 }
