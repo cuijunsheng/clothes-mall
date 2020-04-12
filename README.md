@@ -1,4 +1,4 @@
-# clothes-mall
+# girl-mall
 
 ## Project setup
 ```
