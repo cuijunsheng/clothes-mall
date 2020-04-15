@@ -1,5 +1,5 @@
 # girl-mall
-
+学习vue知识，实践的小案例
 ## Project setup
 ```
 npm install
