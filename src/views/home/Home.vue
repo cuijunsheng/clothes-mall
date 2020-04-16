@@ -7,6 +7,7 @@
     <home-recommend-views :recommends="recommends"/>
     <feature-view/>
     <tab-control :titles="['流行','新款','精选']" class="tab-control"/>
+    <goods-list :goods="goods['pop'].list"/>
 
     <ul>
       <li>1111</li>
@@ -33,19 +34,25 @@
 <script>
   import NavBar from 'components/common/navbar/NavBar'
   import TabControl from 'components/context/tabControl/TabControl'
+  import GoodsList from 'components/context/goodsList/GoodsList'
 
   import HomeSwiper from './components/HomeSwiper'
-  import HomeRecommendViews from './components/HomeRecommendViews'
+  import HomeRecommendViews from './components/RecommendView'
   import FeatureView from './components/FeatureView'
 
-  import {getHomeMultiData} from "network/home";
+  import {getHomeMultiData, getHomeGoods} from "network/home";
 
   export default {
     name: "Home",
     data() {
       return {
         banners: [],
-        recommends: []
+        recommends: [],
+        goods: {
+          pop: {page: 0, list: []},
+          new: {page: 0, list: []},
+          sell: {page: 0, list: []}
+        }
       }
     },
     components: {
@@ -53,14 +60,32 @@
       TabControl,
       HomeSwiper,
       HomeRecommendViews,
-      FeatureView
+      FeatureView,
+      GoodsList
 
     },
     created() {
-      getHomeMultiData().then(res => {
-        this.banners = res.data.banner.list;
-        this.recommends = res.data.recommend.list;
-      })
+      //1.请求首页基本数据
+      this.getHomeMultiData();
+
+      //2.请求首页商品数据
+      this.getHomeGoods('pop')
+      this.getHomeGoods('new')
+      this.getHomeGoods('sell')
+    },
+    methods: {
+      getHomeMultiData() {
+        getHomeMultiData().then(res => {
+          this.banners = res.data.banner.list;
+          this.recommends = res.data.recommend.list;
+        })
+      },
+      getHomeGoods(type) {
+        let page = this.goods[type].page+=1
+        getHomeGoods(type, page).then(res => {
+          this.goods[type].list.push(...res.data.list);
+        })
+      }
     }
   }
 </script>
@@ -83,6 +108,7 @@
 
   .tab-control {
     position: sticky;
-    top: 44px
+    top: 44px;
+    z-index: 9;
   }
 </style>
