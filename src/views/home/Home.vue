@@ -3,42 +3,28 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
-    <home-swiper :banners="banners"/>
-    <home-recommend-views :recommends="recommends"/>
-    <feature-view/>
-    <tab-control :titles="['流行','新款','精选']" class="tab-control" @tabClick="tabClick"/>
-    <goods-list :goods="showGoods"/>
-
-    <ul>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-      <li>1111</li>
-    </ul>
+    <scroll class="scroll-content" ref="scroll" :probeType="3" @scroll="contentScroll">
+      <home-swiper :banners="banners"/>
+      <home-recommend-views :recommends="recommends"/>
+      <feature-view/>
+      <tab-control :titles="['流行','新款','精选']" class="tab-control" @tabClick="tabClick"/>
+      <goods-list :goods="showGoods"/>
+    </scroll>
+    <!--监听组件根元素的原生事件，必须用事件修饰符.native-->
+    <back-top @click.native="backTop" v-show="isShowBackTop"/>
   </div>
 </template>
 
 <script>
-  import NavBar from 'components/common/navbar/NavBar'
-  import TabControl from 'components/context/tabControl/TabControl'
-  import GoodsList from 'components/context/goodsList/GoodsList'
-
   import HomeSwiper from './components/HomeSwiper'
   import HomeRecommendViews from './components/RecommendView'
   import FeatureView from './components/FeatureView'
+
+  import NavBar from 'components/common/navbar/NavBar'
+  import TabControl from 'components/context/tabControl/TabControl'
+  import GoodsList from 'components/context/goodsList/GoodsList'
+  import Scroll from "components/common/scroll/Scroll";
+  import BackTop from "components/context/backTop/BackTop";
 
   import {getHomeMultiData, getHomeGoods} from "network/home";
 
@@ -53,7 +39,8 @@
           new: {page: 0, list: []},
           sell: {page: 0, list: []}
         },
-        currentType: 'pop'
+        currentType: 'pop',
+        isShowBackTop: false
       }
     },
     components: {
@@ -62,8 +49,9 @@
       HomeSwiper,
       HomeRecommendViews,
       FeatureView,
-      GoodsList
-
+      GoodsList,
+      Scroll,
+      BackTop
     },
     created() {
       //1.请求首页基本数据
@@ -74,8 +62,11 @@
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
     },
-    computed:{
-      showGoods(){
+    mounted() {
+
+    },
+    computed: {
+      showGoods() {
         return this.goods[this.currentType].list
       }
     },
@@ -95,6 +86,15 @@
             this.currentType = 'sell'
             break
         }
+      },
+      backTop() {
+        //父组件获取名为scroll的子组件对象
+        // this.$refs.scroll.bScroll.scrollTo(0, 0, 500)
+        //拿到scroll子组件后，直接调用组件封装的backTop()，而不是拿到组件内bScroll对象后再调用对象的scrollTo()
+        this.$refs.scroll.backTop(0, 0, 500);
+      },
+      contentScroll(position) {
+        this.isShowBackTop = (-position.y) > 1000 ? true : false
       },
 
 
@@ -120,6 +120,8 @@
 <style scoped>
   #home {
     padding-top: 44px;
+    position: relative;
+    height: 100vh; /*100%视口 viewpoint height ,由于内容把home整体都撑高了，所以需要一个固定高度*/
   }
 
   .home-nav {
@@ -138,4 +140,19 @@
     top: 44px;
     z-index: 9;
   }
+
+  .scroll-content {
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+  }
+
+  /*.scroll-content {
+    height: calc(100% - 93px); !*css3中计算div长度值，减去上下高度就是要滚动的高度*!
+    overflow: hidden;
+    margin-top: 44px;
+  }*/
 </style>
