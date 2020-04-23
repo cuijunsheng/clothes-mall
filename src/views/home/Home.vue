@@ -3,7 +3,8 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
-    <scroll class="scroll-content" ref="scroll" :probeType="3" @scroll="contentScroll">
+    <scroll class="scroll-content" ref="scroll" :probe-type="3" @scroll="contentScroll" :pullUpLoad="true"
+            @pullingUp="loadMore">
       <home-swiper :banners="banners"/>
       <home-recommend-views :recommends="recommends"/>
       <feature-view/>
@@ -61,9 +62,13 @@
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
+
     },
     mounted() {
-
+      //应该在mounted里拿$refs,如果在created里拿，可能组件还没有挂载到dom上，拿到的是null
+      this.$bus.$on('imageLoad',()=>{
+        this.$refs.scroll.refresh();
+      })
     },
     computed: {
       showGoods() {
@@ -96,7 +101,10 @@
       contentScroll(position) {
         this.isShowBackTop = (-position.y) > 1000 ? true : false
       },
-
+      loadMore(){
+        this.getHomeGoods(this.currentType);
+        this.$refs.scroll.finishPullUp()
+      },
 
       /**
        * 网络请求相关的方法
@@ -111,6 +119,7 @@
         let page = this.goods[type].page += 1
         getHomeGoods(type, page).then(res => {
           this.goods[type].list.push(...res.data.list);
+          this.goods[type].page = page
         })
       }
     }
