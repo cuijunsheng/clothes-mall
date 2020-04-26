@@ -65,9 +65,11 @@
 
     },
     mounted() {
+      const refresh = this.debounce(this.$refs.scroll.refresh,200)
       //应该在mounted里拿$refs,如果在created里拿，可能组件还没有挂载到dom上，拿到的是null
       this.$bus.$on('imageLoad',()=>{
-        this.$refs.scroll.refresh();
+        // this.$refs.scroll.refresh();
+        refresh();
       })
     },
     computed: {
@@ -105,6 +107,17 @@
         this.getHomeGoods(this.currentType);
         this.$refs.scroll.finishPullUp()
       },
+      //防抖函数，防止图片加载调用scroll的refresh()过多，
+      debounce(func,delay){
+        let timer = null
+        return function(...args){
+          if(timer) clearTimeout(timer)
+          timer = setTimeout(()=>{
+            func.apply(this,args);
+          },delay)
+        }
+      },
+
 
       /**
        * 网络请求相关的方法

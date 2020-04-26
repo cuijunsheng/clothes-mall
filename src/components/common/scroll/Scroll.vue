@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper" ref="wrapper">
-    <div class="content" >
+    <div class="content">
       <slot></slot>
     </div>
   </div>
@@ -11,14 +11,14 @@
 
   export default {
     name: "Scroll",
-    props:{
+    props: {
       probeType: {
-        type:Number,
-        default:0
+        type: Number,
+        default: 0
       },
-      pullUpLoad:{
-        type:Boolean,
-        default:false
+      pullUpLoad: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
@@ -35,27 +35,30 @@
       })
 
       //2.监听滚动事件
-      this.bScroll.on("scroll",(position) => {//这里参数必须加括号
-        this.$emit('scroll',position)
-      })
+      if (this.probeType === 2 || this.probeType === 3)
+        this.bScroll.on("scroll", (position) => {//这里参数必须加括号
+          this.$emit('scroll', position)
+        })
 
       //3.监听上拉加载事件
-      this.bScroll.on('pullingUp',()=>{
-        this.$emit('pullingUp')
-      })
-
+      if (this.pullUpLoad) {
+        this.bScroll.on('pullingUp', () => {
+          this.$emit('pullingUp')
+        })
+      }
       console.log(this.bScroll);
     },
     methods: {
       //调用方法的时候先判断以下bScroll有没有初始化成功
-      backTop(x,y,time=500){
-        this.bScroll && this.bScroll.scrollTo(x,y,time)
+      backTop(x, y, time = 500) {
+        this.bScroll && this.bScroll.scrollTo(x, y, time)
       },
-      finishPullUp(){
+      finishPullUp() {
         this.bScroll && this.bScroll.finishPullUp();
       },
-      refresh(){
+      refresh() {
         this.bScroll && this.bScroll.refresh();
+        console.log('refresh---');
       }
     }
   }
