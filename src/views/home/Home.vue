@@ -3,12 +3,17 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
+    <tab-control :titles="['流行','新款','精选']" class="tab-control" ref="tabControl1"
+                 @tabClick="tabClick"
+                 :class="{'tab-control-fixed':isFixed}" v-show="isFixed"/>
     <scroll class="scroll-content" ref="scroll" :probe-type="3" @scroll="contentScroll" :pullUpLoad="true"
             @pullingUp="loadMore">
-      <home-swiper :banners="banners"/>
+      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad"/>
       <home-recommend-views :recommends="recommends"/>
       <feature-view/>
-      <tab-control :titles="['流行','新款','精选']" class="tab-control" @tabClick="tabClick"/>
+      <tab-control :titles="['流行','新款','精选']" class="tab-control" ref="tabControl2"
+                   @tabClick="tabClick"
+                   :class="{'tab-control-fixed':isFixed}"/>
       <goods-list :goods="showGoods"/>
     </scroll>
     <!--监听组件根元素的原生事件，必须用事件修饰符.native-->
@@ -28,6 +33,7 @@
   import BackTop from "components/context/backTop/BackTop";
 
   import {getHomeMultiData, getHomeGoods} from "network/home";
+  import {debounce} from "common/utils";
 
   export default {
     name: "Home",
@@ -41,7 +47,9 @@
           sell: {page: 0, list: []}
         },
         currentType: 'pop',
-        isShowBackTop: false
+        isShowBackTop: false,
+        tabOffsetTop:0,
+        isFixed:false
       }
     },
     components: {
@@ -65,7 +73,7 @@
 
     },
     mounted() {
-      const refresh = this.debounce(this.$refs.scroll.refresh,200)
+      const refresh = debounce(this.$refs.scroll.refresh,200)
       //应该在mounted里拿$refs,如果在created里拿，可能组件还没有挂载到dom上，拿到的是null
       this.$bus.$on('imageLoad',()=>{
         // this.$refs.scroll.refresh();
@@ -93,6 +101,8 @@
             this.currentType = 'sell'
             break
         }
+        this.$refs.tabControl1.currentIndex = index;
+        this.$refs.tabControl2.currentIndex = index;
       },
       backTop() {
         //父组件获取名为scroll的子组件对象
@@ -102,20 +112,15 @@
       },
       contentScroll(position) {
         this.isShowBackTop = (-position.y) > 1000 ? true : false
+        this.isFixed = -position.y >this.tabOffsetTop?true:false
       },
       loadMore(){
         this.getHomeGoods(this.currentType);
         this.$refs.scroll.finishPullUp()
       },
-      //防抖函数，防止图片加载调用scroll的refresh()过多，
-      debounce(func,delay){
-        let timer = null
-        return function(...args){
-          if(timer) clearTimeout(timer)
-          timer = setTimeout(()=>{
-            func.apply(this,args);
-          },delay)
-        }
+      swiperImageLoad(){
+        //因为组件是没有offsetTop属性的，只要元素才有，所以先通过$el就可以拿到组件内部的元素
+        this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
       },
 
 
@@ -141,7 +146,7 @@
 
 <style scoped>
   #home {
-    padding-top: 44px;
+    /*padding-top: 44px;*/
     position: relative;
     height: 100vh; /*100%视口 viewpoint height ,由于内容把home整体都撑高了，所以需要一个固定高度*/
   }
@@ -149,12 +154,13 @@
   .home-nav {
     background-color: var(--color-tint);
     color: #fff;
-    position: fixed;
     width: 100%;
+    /*better-scroll可以实现局部滚动，所以nanbar也不需要固定*/
+    /*position: fixed;
     z-index: 9;
     left: 0;
     right: 0;
-    top: 0;
+    top: 0;*/
   }
 
   .tab-control {
@@ -177,4 +183,11 @@
     overflow: hidden;
     margin-top: 44px;
   }*/
+
+  .tab-control-fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 44px;
+  }
 </style>
