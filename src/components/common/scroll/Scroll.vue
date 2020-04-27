@@ -50,7 +50,7 @@
     },
     methods: {
       //调用方法的时候先判断以下bScroll有没有初始化成功
-      backTop(x, y, time = 500) {
+      scrollTo(x, y, time = 500) {
         this.bScroll && this.bScroll.scrollTo(x, y, time)
       },
       finishPullUp() {
@@ -58,7 +58,9 @@
       },
       refresh() {
         this.bScroll && this.bScroll.refresh();
-        console.log('refresh---');
+      },
+      getScrollY(){
+        return this.bScroll ? this.bScroll.y : 0
       }
     }
   }

@@ -49,7 +49,8 @@
         currentType: 'pop',
         isShowBackTop: false,
         tabOffsetTop:0,
-        isFixed:false
+        isFixed:false,
+        saveScrollY:0
       }
     },
     components: {
@@ -80,6 +81,13 @@
         refresh();
       })
     },
+    activated() {
+      this.$refs.scroll.scrollTo(0,this.saveScrollY,0)
+      this.$refs.scroll.refresh();
+    },
+    deactivated() {
+      this.saveScrollY = this.$refs.scroll.getScrollY();
+    },
     computed: {
       showGoods() {
         return this.goods[this.currentType].list
@@ -108,7 +116,7 @@
         //父组件获取名为scroll的子组件对象
         // this.$refs.scroll.bScroll.scrollTo(0, 0, 500)
         //拿到scroll子组件后，直接调用组件封装的backTop()，而不是拿到组件内bScroll对象后再调用对象的scrollTo()
-        this.$refs.scroll.backTop(0, 0, 500);
+        this.$refs.scroll.scrollTo(0, 0, 500);
       },
       contentScroll(position) {
         this.isShowBackTop = (-position.y) > 1000 ? true : false
