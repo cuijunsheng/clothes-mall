@@ -1,5 +1,5 @@
 <template>
-  <div class="goods">
+  <div class="goods" @click="goToDetail">
     <img :src="goods.show.img" @load="imageLoad">
     <div class="goods-info">
       <p>{{goods.title}}</p>
@@ -20,7 +20,11 @@
         }
       }
     },
-    methods:{
+    data() {
+      return {
+      }
+    },
+    methods: {
       /**
        *    1.问题：在使用better-scroll做滚动时，会在图片加载完成之前计算出可滚动的高度，比如1300,但是真正要滚动
        * 的高度是图片加载完之后的高度，比如4000，但是scrollHeight不会被重新计算，要想重新计算这个值，必须调用
@@ -37,8 +41,16 @@
        *  但是正常是没有$bus这个属性的，必须再Vue原型中加上这个，Vue.prototype.$bus=new Vue()
        *  监听图片加载完成
        */
-      imageLoad(){
+      imageLoad() {
         this.$bus.$emit('imageLoad');
+      },
+      goToDetail() {
+        this.$router.push({
+          path: '/detail',
+          query: {
+            id: this.goods.iid
+          }
+        })
       }
     }
   }
@@ -50,6 +62,7 @@
     position: relative;
     width: 48%;
   }
+
   .goods img {
     width: 100%;
     border-radius: 5px;

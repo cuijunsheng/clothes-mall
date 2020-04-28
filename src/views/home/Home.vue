@@ -82,8 +82,8 @@
       })
     },
     activated() {
-      this.$refs.scroll.scrollTo(0,this.saveScrollY,0)
       this.$refs.scroll.refresh();
+      this.$refs.scroll.scrollTo(0,this.saveScrollY,0)
     },
     deactivated() {
       this.saveScrollY = this.$refs.scroll.getScrollY();
