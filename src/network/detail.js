@@ -21,3 +21,9 @@ export class GoodsInfo {
     this.nowPrice = itemInfo.highNowPrice;
   }
 }
+
+export function getRecommends() {
+  return request({
+    url:'recommend'
+  })
+}

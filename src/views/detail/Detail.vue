@@ -1,12 +1,14 @@
 <template>
   <div id="detail">
     <detail-nav-bar/>
-    <scroll class="scroll-content">
+    <scroll class="scroll-content" ref="scroll">
       <detail-swiper :top-images="topImages"/>
       <detail-base-info :goods-info="goodsInfo"/>
       <detail-shop-info :shop="shopInfo"/>
       <detail-image-info :image-info="detailImageInfo"/>
       <detail-param-info :param-info="detailParamInfo"/>
+      <detail-comment-info :comments="comments"/>
+      <goods-list :goods="recommends"/>
     </scroll>
   </div>
 </template>
@@ -18,10 +20,13 @@
   import DetailShopInfo from "./components/DetailShopInfo";
   import DetailImageInfo from "./components/DetailImageInfo";
   import DetailParamInfo from "./components/DetailParamInfo";
+  import DetailCommentInfo from "./components/DetailCommentInfo";
 
   import Scroll from "components/common/scroll/Scroll";
+  import GoodsList from "components/context/goodsList/GoodsList";
 
-  import {getDetails, GoodsInfo} from 'network/detail'
+  import {getDetails, GoodsInfo, getRecommends} from 'network/detail'
+  import {imgLoadListenerMixin} from "common/mixins";
 
   export default {
     name: "Detail",
@@ -32,7 +37,9 @@
         goodsInfo: {},
         shopInfo: {},
         detailImageInfo: [],
-        detailParamInfo:{}
+        detailParamInfo: {},
+        comments: {},
+        recommends:[]
       }
     },
     components: {
@@ -42,13 +49,17 @@
       DetailBaseInfo,
       DetailShopInfo,
       DetailImageInfo,
-
+      DetailCommentInfo,
+      GoodsList,
       Scroll
     },
+    mixins:[imgLoadListenerMixin],
     created() {
+      //1.获取商品id
       this.id = this.$route.query.id;
+      //2.请求详情数据
       getDetails(this.id).then(res => {
-        console.log(res);
+        /*console.log(res);*/
         const data = res.result;
         //1.获取顶部的轮播图数据
         this.topImages = data.itemInfo.topImages;
@@ -61,8 +72,20 @@
         this.detailImageInfo = data.detailInfo.detailImage;
         //5.获取参数信息
         this.detailParamInfo = data.itemParams;
+        //6.获取评论信息
+        this.comments = data.rate.list[0];
+      })
+      //3.请求推荐数据
+      getRecommends().then(res => {
+        console.log(res);
+        this.recommends = res.data.list;
       })
     },
+    mounted() {
+    },
+    destroyed() {
+      this.$bus.$off('imageLoad',this.imgLoadListener)
+    }
   }
 </script>
 

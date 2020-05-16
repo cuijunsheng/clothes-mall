@@ -33,7 +33,7 @@
   import BackTop from "components/context/backTop/BackTop";
 
   import {getHomeMultiData, getHomeGoods} from "network/home";
-  import {debounce} from "common/utils";
+  import {imgLoadListenerMixin} from "common/mixins";
 
   export default {
     name: "Home",
@@ -48,9 +48,9 @@
         },
         currentType: 'pop',
         isShowBackTop: false,
-        tabOffsetTop:0,
-        isFixed:false,
-        saveScrollY:0
+        tabOffsetTop: 0,
+        isFixed: false,
+        saveScrollY: 0
       }
     },
     components: {
@@ -63,6 +63,7 @@
       Scroll,
       BackTop
     },
+    mixins:[imgLoadListenerMixin],
     created() {
       //1.请求首页基本数据
       this.getHomeMultiData();
@@ -74,19 +75,16 @@
 
     },
     mounted() {
-      const refresh = debounce(this.$refs.scroll.refresh,200)
-      //应该在mounted里拿$refs,如果在created里拿，可能组件还没有挂载到dom上，拿到的是null
-      this.$bus.$on('imageLoad',()=>{
-        // this.$refs.scroll.refresh();
-        refresh();
-      })
+      //此处全局监听事件，监听图片加载内容抽到了混入对象中
+      console.log('home mounted');
     },
     activated() {
       this.$refs.scroll.refresh();
-      this.$refs.scroll.scrollTo(0,this.saveScrollY,0)
+      this.$refs.scroll.scrollTo(0, this.saveScrollY, 0)
     },
     deactivated() {
       this.saveScrollY = this.$refs.scroll.getScrollY();
+      this.$bus.$off('imageLoad',this.imgLoadListener);
     },
     computed: {
       showGoods() {
@@ -120,13 +118,13 @@
       },
       contentScroll(position) {
         this.isShowBackTop = (-position.y) > 1000 ? true : false
-        this.isFixed = -position.y >this.tabOffsetTop?true:false
+        this.isFixed = -position.y > this.tabOffsetTop ? true : false
       },
-      loadMore(){
+      loadMore() {
         this.getHomeGoods(this.currentType);
         this.$refs.scroll.finishPullUp()
       },
-      swiperImageLoad(){
+      swiperImageLoad() {
         //因为组件是没有offsetTop属性的，只要元素才有，所以先通过$el就可以拿到组件内部的元素
         this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
       },
