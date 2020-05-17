@@ -1,14 +1,14 @@
 <template>
   <div id="detail">
-    <detail-nav-bar/>
+    <detail-nav-bar class="nav-bar" @titleClick="titleClick"/>
     <scroll class="scroll-content" ref="scroll">
       <detail-swiper :top-images="topImages"/>
       <detail-base-info :goods-info="goodsInfo"/>
       <detail-shop-info :shop="shopInfo"/>
-      <detail-image-info :image-info="detailImageInfo"/>
-      <detail-param-info :param-info="detailParamInfo"/>
-      <detail-comment-info :comments="comments"/>
-      <goods-list :goods="recommends"/>
+      <detail-image-info :image-info="detailImageInfo" @imageLoad="detailImageLoad"/>
+      <detail-param-info :param-info="detailParamInfo" ref="param"/>
+      <detail-comment-info :comments="comments" ref="comment"/>
+      <goods-list :goods="recommends" ref="recommend"/>
     </scroll>
   </div>
 </template>
@@ -27,6 +27,7 @@
 
   import {getDetails, GoodsInfo, getRecommends} from 'network/detail'
   import {imgLoadListenerMixin} from "common/mixins";
+  import {debounce} from "common/utils";
 
   export default {
     name: "Detail",
@@ -39,7 +40,9 @@
         detailImageInfo: [],
         detailParamInfo: {},
         comments: {},
-        recommends:[]
+        recommends:[],
+        themeTopYArray:[],
+        getThemeTopY:null
       }
     },
     components: {
@@ -80,11 +83,29 @@
         console.log(res);
         this.recommends = res.data.list;
       })
+      //4.给getThemeTopY赋值
+      this.getThemeTopY=debounce(()=>{
+        this.themeTopYArray=[]
+        this.themeTopYArray.push(0)
+        this.themeTopYArray.push(this.$refs.param.$el.offsetTop)
+        this.themeTopYArray.push(this.$refs.comment.$el.offsetTop)
+        this.themeTopYArray.push(this.$refs.recommend.$el.offsetTop)
+        console.log(this.themeTopYArray);
+      },1000)
     },
     mounted() {
     },
     destroyed() {
       this.$bus.$off('imageLoad',this.imgLoadListener)
+    },
+    methods:{
+      detailImageLoad(){
+        this.newRefresh()
+        this.getThemeTopY()
+      },
+      titleClick(index){
+        this.$refs.scroll.scrollTo(0,-this.themeTopYArray[index])
+      }
     }
   }
 </script>
@@ -94,7 +115,11 @@
     height: 100vh;
     background-color: #fff;
   }
-
+  .nav-bar {
+    position: relative;
+    z-index: 9;
+    background-color: #fff;
+  }
   .scroll-content {
     height: calc(100% - 44px);
     position: relative;

@@ -76,7 +76,6 @@
     },
     mounted() {
       //此处全局监听事件，监听图片加载内容抽到了混入对象中
-      console.log('home mounted');
     },
     activated() {
       this.$refs.scroll.refresh();

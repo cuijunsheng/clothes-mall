@@ -8,7 +8,7 @@
       </div>
       <div class="image-key">{{item.key}}</div>
       <div v-for="image in item.list" class="image-info">
-        <img :src="image">
+        <img :src="image" @load="imageLoad">
       </div>
     </div>
   </div>
@@ -23,6 +23,15 @@
         default() {
           return {}
         }
+      }
+    },
+    methods:{
+      imageLoad(){
+        //1.通过自定义事件发出去，父组件接受后做刷新scroll高度操作
+        this.$emit('imageLoad')
+        //2.通过事件总线发出去，在混入对象中做刷新scroll高度操作,由于详情页需要做点击主题切换到滚动到对应
+        //内容，所以需要在图片加载完后获取offSetTop值，所以用第一种自定义事件
+       /* this.$bus.$emit('imageLoad')*/
       }
     }
   }
